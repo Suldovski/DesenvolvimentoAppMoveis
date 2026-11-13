@@ -34,3 +34,24 @@ data object CadastrarUsuario
 
 @Serializable
 data class UsuarioEditar(val id: Long)
+
+@Serializable
+data object Categorias
+
+@Serializable
+data object CategoriaCadastrar
+
+@Serializable
+data class CategoriaEditar(val id: Long)
+
+@Serializable
+data object Produtos
+
+@Serializable
+data object ProdutoCadastrar
+
+@Serializable
+data class ProdutoEditar(val id: Long)
+
+@Serializable
+data object Camera

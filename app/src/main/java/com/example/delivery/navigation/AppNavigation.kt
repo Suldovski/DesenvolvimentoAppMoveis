@@ -16,15 +16,24 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import com.example.delivery.auth.SessaoUsuario
 import com.example.delivery.ui.screens.CadastroScreen
+import com.example.delivery.ui.screens.CameraScreen
 import com.example.delivery.ui.screens.CarrinhoScreen
+import com.example.delivery.ui.screens.CategoriaCadastroScreen
+import com.example.delivery.ui.screens.CategoriaEditarScreen
+import com.example.delivery.ui.screens.CategoriasScreen
 import com.example.delivery.ui.screens.ConfirmadoScreen
 import com.example.delivery.ui.screens.LoginScreen
+import com.example.delivery.ui.screens.ProdutoCadastroScreen
+import com.example.delivery.ui.screens.ProdutoEditarScreen
 import com.example.delivery.ui.screens.ProdutoScreen
+import com.example.delivery.ui.screens.ProdutosScreen
 import com.example.delivery.ui.screens.RestauranteCadastroScreen
 import com.example.delivery.ui.screens.RestauranteEditarScreen
 import com.example.delivery.ui.screens.RestaurantesScreen
 import com.example.delivery.ui.screens.UsuarioEditarScreen
 import com.example.delivery.ui.screens.UsuariosScreen
+import com.example.delivery.ui.viewmodel.CategoriaViewModel
+import com.example.delivery.ui.viewmodel.ProdutoViewModel
 import com.example.delivery.ui.viewmodel.RestauranteViewModel
 import com.example.delivery.ui.viewmodel.UsuarioViewModel
 
@@ -150,6 +159,74 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
                 viewModel = viewModel(),
                 voltar = { navController.popBackStack() }
             )
+        }
+
+        composable<Categorias> { entrada ->
+            val categoriaViewModel: CategoriaViewModel = viewModel()
+            DisposableEffect(entrada) {
+                val observer = LifecycleEventObserver { _, evento ->
+                    if (evento == Lifecycle.Event.ON_RESUME) categoriaViewModel.listar()
+                }
+                entrada.lifecycle.addObserver(observer)
+                onDispose { entrada.lifecycle.removeObserver(observer) }
+            }
+            CategoriasScreen(
+                viewModel = categoriaViewModel,
+                irParaCadastro = { navController.navigate(CategoriaCadastrar) },
+                irParaEdicao = { navController.navigate(CategoriaEditar(it)) }
+            )
+        }
+
+        composable<CategoriaCadastrar> {
+            CategoriaCadastroScreen(
+                viewModel = viewModel(),
+                voltar = { navController.popBackStack() }
+            )
+        }
+
+        composable<CategoriaEditar> { entrada ->
+            val rota = entrada.toRoute<CategoriaEditar>()
+            CategoriaEditarScreen(
+                categoriaId = rota.id,
+                viewModel = viewModel(),
+                voltar = { navController.popBackStack() }
+            )
+        }
+
+        composable<Produtos> { entrada ->
+            val produtoViewModel: ProdutoViewModel = viewModel()
+            DisposableEffect(entrada) {
+                val observer = LifecycleEventObserver { _, evento ->
+                    if (evento == Lifecycle.Event.ON_RESUME) produtoViewModel.listar()
+                }
+                entrada.lifecycle.addObserver(observer)
+                onDispose { entrada.lifecycle.removeObserver(observer) }
+            }
+            ProdutosScreen(
+                viewModel = produtoViewModel,
+                irParaCadastro = { navController.navigate(ProdutoCadastrar) },
+                irParaEdicao = { navController.navigate(ProdutoEditar(it)) }
+            )
+        }
+
+        composable<ProdutoCadastrar> {
+            ProdutoCadastroScreen(
+                viewModel = viewModel(),
+                voltar = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProdutoEditar> { entrada ->
+            val rota = entrada.toRoute<ProdutoEditar>()
+            ProdutoEditarScreen(
+                produtoId = rota.id,
+                viewModel = viewModel(),
+                voltar = { navController.popBackStack() }
+            )
+        }
+
+        composable<Camera> {
+            CameraScreen()
         }
     }
 }

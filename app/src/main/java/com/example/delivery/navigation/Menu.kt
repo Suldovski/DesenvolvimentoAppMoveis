@@ -25,13 +25,19 @@ fun Menu(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = { navController.navigate(Restaurantes) }) {
-                Text("Buscar", fontSize = 16.sp)
+                Text("Rest.", fontSize = 12.sp)
             }
-            TextButton(onClick = { navController.navigate(Carrinho) }) {
-                Text("Carrinho", fontSize = 16.sp)
+            TextButton(onClick = { navController.navigate(Categorias) }) {
+                Text("Cat.", fontSize = 12.sp)
+            }
+            TextButton(onClick = { navController.navigate(Produtos) }) {
+                Text("Prod.", fontSize = 12.sp)
+            }
+            TextButton(onClick = { navController.navigate(Camera) }) {
+                Text("Cam.", fontSize = 12.sp)
             }
             TextButton(onClick = { navController.navigate(Usuarios) }) {
-                Text("Usuários", fontSize = 16.sp)
+                Text("User", fontSize = 12.sp)
             }
             TextButton(
                 onClick = {
@@ -41,7 +47,7 @@ fun Menu(navController: NavHostController) {
                     }
                 }
             ) {
-                Text("Sair", fontSize = 16.sp)
+                Text("Sair", fontSize = 12.sp)
             }
         }
     }

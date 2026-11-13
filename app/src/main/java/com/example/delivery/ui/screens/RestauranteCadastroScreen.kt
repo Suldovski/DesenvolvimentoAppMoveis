@@ -2,27 +2,27 @@ package com.example.delivery.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.delivery.ui.viewmodel.RestauranteViewModel
 
@@ -31,9 +31,9 @@ fun RestauranteCadastroScreen(
     viewModel: RestauranteViewModel,
     voltar: () -> Unit
 ) {
-    var nome by remember { mutableStateOf("") }
-    var avaliacao by remember { mutableStateOf("") }
-    var tempo by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        viewModel.limparFormulario()
+    }
 
     LaunchedEffect(viewModel.salvo) {
         if (viewModel.salvo) {
@@ -48,45 +48,133 @@ fun RestauranteCadastroScreen(
             .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Novo restaurante", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(
+            "Novo restaurante",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
 
         OutlinedTextField(
-            value = nome,
-            onValueChange = { if (it.length <= 100) nome = it },
+            value = viewModel.nome,
+            onValueChange = viewModel::mudarNome,
             label = { Text("Nome") },
             singleLine = true,
             enabled = !viewModel.carregando,
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
-            value = avaliacao,
-            onValueChange = { if (it.length <= 10) avaliacao = it },
+            value = viewModel.avaliacao,
+            onValueChange = viewModel::mudarAvaliacao,
             label = { Text("Avaliação (0 a 5)") },
             singleLine = true,
             enabled = !viewModel.carregando,
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
-            value = tempo,
-            onValueChange = { if (it.length <= 20) tempo = it },
+            value = viewModel.tempo,
+            onValueChange = viewModel::mudarTempo,
             label = { Text("Tempo de entrega") },
             singleLine = true,
             enabled = !viewModel.carregando,
             modifier = Modifier.fillMaxWidth()
         )
 
-        viewModel.mensagem?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        Text("Endereço", fontWeight = FontWeight.SemiBold)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = viewModel.cep,
+                onValueChange = viewModel::mudarCep,
+                label = { Text("CEP") },
+                singleLine = true,
+                enabled = !viewModel.carregando && !viewModel.consultandoCep,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.weight(1f)
+            )
+            Button(
+                onClick = viewModel::consultarCep,
+                enabled = !viewModel.carregando && !viewModel.consultandoCep,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Buscar", color = Color.White)
+            }
+        }
+
+        if (viewModel.consultandoCep) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        OutlinedTextField(
+            value = viewModel.rua,
+            onValueChange = viewModel::mudarRua,
+            label = { Text("Rua") },
+            singleLine = true,
+            enabled = !viewModel.carregando,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = viewModel.bairro,
+            onValueChange = viewModel::mudarBairro,
+            label = { Text("Bairro") },
+            singleLine = true,
+            enabled = !viewModel.carregando,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = viewModel.cidade,
+                onValueChange = viewModel::mudarCidade,
+                label = { Text("Cidade") },
+                singleLine = true,
+                enabled = !viewModel.carregando,
+                modifier = Modifier.weight(2f)
+            )
+            OutlinedTextField(
+                value = viewModel.uf,
+                onValueChange = viewModel::mudarUf,
+                label = { Text("UF") },
+                singleLine = true,
+                enabled = !viewModel.carregando,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        viewModel.mensagem?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
         if (viewModel.carregando) Text("Aguarde...")
 
         Button(
-            onClick = { viewModel.cadastrar(nome, avaliacao, tempo) },
-            enabled = !viewModel.carregando,
+            onClick = {
+                viewModel.cadastrar(
+                    viewModel.nome,
+                    viewModel.avaliacao,
+                    viewModel.tempo,
+                    viewModel.cep,
+                    viewModel.rua,
+                    viewModel.bairro,
+                    viewModel.cidade,
+                    viewModel.uf
+                )
+            },
+            enabled = !viewModel.carregando && !viewModel.consultandoCep,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Cadastrar", color = Color.White, fontWeight = FontWeight.Bold) }
+        ) {
+            Text("Cadastrar", color = Color.White, fontWeight = FontWeight.Bold)
+        }
 
-        TextButton(onClick = voltar, enabled = !viewModel.carregando) { Text("Voltar") }
+        TextButton(onClick = voltar, enabled = !viewModel.carregando) {
+            Text("Voltar")
+        }
     }
 }
