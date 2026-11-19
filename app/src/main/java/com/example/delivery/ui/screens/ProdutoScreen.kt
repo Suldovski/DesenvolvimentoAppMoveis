@@ -25,11 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.delivery.data.model.Produto
 
 @Composable
 fun ProdutoScreen(
     modifier: Modifier = Modifier,
-    irParaCarrinho: () -> Unit
+    produto: Produto,
+    irParaCarrinho: () -> Unit,
+    aoAdicionar: (nome: String, preco: Double, quantidade: Int) -> Unit
 ) {
     var quantidade by remember { mutableIntStateOf(1) }
 
@@ -61,21 +64,21 @@ fun ProdutoScreen(
             }
 
             Text(
-                text = "Combo Clássico",
+                text = produto.nome,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
             Text(
-                text = "Hambúrguer, batata frita e refrigerante",
+                text = "Produto selecionado",
                 color = Color.Gray,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             Text(
-                text = "R$ 29,90",
+                text = "R$ ${produto.preco.replace('.', ',')}",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFD32F2F),
@@ -106,7 +109,11 @@ fun ProdutoScreen(
         }
 
         Button(
-            onClick = irParaCarrinho,
+            onClick = {
+                val preco = produto.preco.replace(',', '.').toDoubleOrNull() ?: 0.0
+                aoAdicionar(produto.nome, preco, quantidade)
+                irParaCarrinho()
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
             modifier = Modifier
                 .fillMaxWidth()

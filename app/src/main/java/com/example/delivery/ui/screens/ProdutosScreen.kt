@@ -31,7 +31,8 @@ import com.example.delivery.ui.viewmodel.ProdutoViewModel
 fun ProdutosScreen(
     viewModel: ProdutoViewModel,
     irParaCadastro: () -> Unit,
-    irParaEdicao: (Long) -> Unit
+    irParaEdicao: (Long) -> Unit,
+    irParaCompra: (Long) -> Unit = {}
 ) {
     var excluirId by remember { mutableStateOf<Long?>(null) }
 
@@ -77,8 +78,9 @@ fun ProdutosScreen(
                         Text(prod.nome)
                         Text("R$ ${prod.preco}")
                     }
-                    TextButton(onClick = { excluirId = prod.id }) {
-                        Text("Excluir")
+                    Column {
+                        TextButton(onClick = { irParaCompra(prod.id) }) { Text("Comprar") }
+                        TextButton(onClick = { excluirId = prod.id }) { Text("Excluir") }
                     }
                 }
             }

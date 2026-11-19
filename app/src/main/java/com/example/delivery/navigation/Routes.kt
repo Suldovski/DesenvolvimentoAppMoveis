@@ -18,7 +18,10 @@ data object RestauranteCadastrar
 data class RestauranteEditar(val id: Long)
 
 @Serializable
-data object Produto
+data class RestauranteProdutos(val id: Long, val nome: String)
+
+@Serializable
+data class Produto(val id: Long)
 
 @Serializable
 data object Carrinho

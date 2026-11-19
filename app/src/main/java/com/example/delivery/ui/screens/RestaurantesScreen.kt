@@ -40,7 +40,7 @@ import com.example.delivery.ui.viewmodel.RestauranteViewModel
 @Composable
 fun RestaurantesScreen(
     viewModel: RestauranteViewModel,
-    irParaProduto: () -> Unit,
+    irParaProduto: (Long, String) -> Unit,
     irParaCadastro: () -> Unit,
     irParaEdicao: (Long) -> Unit
 ) {
@@ -129,7 +129,7 @@ fun RestaurantesScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { irParaProduto() },
+                    .clickable { irParaProduto(rest.id, rest.nome) },
                 elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {

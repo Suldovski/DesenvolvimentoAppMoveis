@@ -14,10 +14,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import androidx.compose.runtime.LaunchedEffect
 import com.example.delivery.auth.SessaoUsuario
 import com.example.delivery.ui.screens.CadastroScreen
 import com.example.delivery.ui.screens.CameraScreen
 import com.example.delivery.ui.screens.CarrinhoScreen
+import com.example.delivery.ui.screens.CarrinhoState
 import com.example.delivery.ui.screens.CategoriaCadastroScreen
 import com.example.delivery.ui.screens.CategoriaEditarScreen
 import com.example.delivery.ui.screens.CategoriasScreen
@@ -30,6 +32,7 @@ import com.example.delivery.ui.screens.ProdutosScreen
 import com.example.delivery.ui.screens.RestauranteCadastroScreen
 import com.example.delivery.ui.screens.RestauranteEditarScreen
 import com.example.delivery.ui.screens.RestaurantesScreen
+import com.example.delivery.ui.screens.RestauranteProdutosScreen
 import com.example.delivery.ui.screens.UsuarioEditarScreen
 import com.example.delivery.ui.screens.UsuariosScreen
 import com.example.delivery.ui.viewmodel.CategoriaViewModel
@@ -90,9 +93,22 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
             }
             RestaurantesScreen(
                 viewModel = restauranteViewModel,
-                irParaProduto = { navController.navigate(Produto) },
+                irParaProduto = { id, nome -> navController.navigate(RestauranteProdutos(id, nome)) },
                 irParaCadastro = { navController.navigate(RestauranteCadastrar) },
                 irParaEdicao = { navController.navigate(RestauranteEditar(it)) }
+            )
+        }
+
+        composable<RestauranteProdutos> { entrada ->
+            val rota = entrada.toRoute<RestauranteProdutos>()
+            val produtoViewModel: ProdutoViewModel = viewModel()
+            RestauranteProdutosScreen(
+                viewModel = produtoViewModel,
+                nomeRestaurante = rota.nome,
+                aoAdicionar = { nome, preco ->
+                    CarrinhoState.adicionar(nome, preco, 1)
+                },
+                voltar = { navController.navigate(Carrinho) }
             )
         }
 
@@ -112,12 +128,33 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
             )
         }
 
-        composable<Produto> {
-            ProdutoScreen(irParaCarrinho = { navController.navigate(Carrinho) })
+        composable<Produto> { entrada ->
+            val rota = entrada.toRoute<Produto>()
+            val produtoViewModel: ProdutoViewModel = viewModel()
+
+            LaunchedEffect(rota.id) {
+                produtoViewModel.buscarPorId(rota.id)
+            }
+
+            produtoViewModel.produto?.let { produto ->
+                ProdutoScreen(
+                    produto = produto,
+                    irParaCarrinho = { navController.navigate(Carrinho) },
+                    aoAdicionar = { nome, preco, quantidade ->
+                        CarrinhoState.adicionar(nome, preco, quantidade)
+                    }
+                )
+            }
         }
 
         composable<Carrinho> {
-            CarrinhoScreen(irParaConfirmacao = { navController.navigate(Confirmado) })
+            CarrinhoScreen(
+                irParaConfirmacao = {
+                    CarrinhoState.limpar()
+                    navController.navigate(Confirmado)
+                },
+                adicionarMaisProdutos = { navController.navigate(Restaurantes) }
+            )
         }
 
         composable<Confirmado> {
@@ -205,7 +242,8 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
             ProdutosScreen(
                 viewModel = produtoViewModel,
                 irParaCadastro = { navController.navigate(ProdutoCadastrar) },
-                irParaEdicao = { navController.navigate(ProdutoEditar(it)) }
+                irParaEdicao = { navController.navigate(ProdutoEditar(it)) },
+                irParaCompra = { navController.navigate(Produto(it)) }
             )
         }
 
